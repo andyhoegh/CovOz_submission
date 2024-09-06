@@ -9,7 +9,6 @@ library(rstan)
 options(mc.cores = parallel::detectCores())
 library(lubridate)
 
-
 bat_list <- read_csv('data/individual_variant_covariates.csv') %>%
   filter(!is.na(bat_age), bat_age != 'BLANK') |>
   group_by(bat_species, type) %>%

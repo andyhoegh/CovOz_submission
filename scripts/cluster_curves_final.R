@@ -69,4 +69,4 @@ for (clst in all_clusters){
   
 }
 
-write_csv(out_fitted_curves, file ="Data/results/cluster_curves.csv")
+write_csv(out_fitted_curves, file ="data/model_output/cluster_curves.csv")
