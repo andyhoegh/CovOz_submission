@@ -5,17 +5,28 @@ Instructions for running code associated with "Synchronized seasonal excretion o
 
 ### Coinfection Analysis
 
+Runs chi-squared tests on coinfections of beta 2d.iv and beta 2d.v. Generates summary statistics, test statistics, and p-values from manuscript.
+
 - input files: individual_variant_covariates.csv
-  - needed: species + age + infection status
 - script file: coinfection_final.R
 
 ### Individual Level Dynamics of Infection: Dynamic Binary Regression
 
+Runs individual level dynamic binary regression models. Produces output file that can recreate figures.
+
 - input files: individual_variant_covariates.csv
-  - needed: species + sampling_date + infection status
 - script files:
   - logistic_curves_final.R
   - GP_regression.stan
+- output files: logistic_curve_out.RData
   
   
 ### Dynamics of Circulation at the Population Level
+
+Runs combined (individual and pooled data) dynamic models. Produces output file that can recreate figures.
+
+- input files: combined_out_variant.csv
+- script files:
+  - cluster_curves_final.R
+  - GP_withLL.stan
+- output files: cluster_curves.csv
