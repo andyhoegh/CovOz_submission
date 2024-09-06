@@ -3,12 +3,13 @@
 # R code for "Dynamics of Circulation at the Population Level" Section
 ############################################################################################################
 ############################################################################################################
-
 library(tidyverse)
 library(lubridate)
 library(stringr)
+library(rstan)
+options(mc.cores = parallel::detectCores())
 
-options(mc.cores = 4)
+combined_out_variant <- read_csv('data/combined_out_variant.csv')
 
 all_clusters <- c('beta 2d.i', "beta 2d.ii", 'beta 2d.iii', 'beta 2d.iv', 'beta 2d.v', 'beta 2d.vi')
 out_fitted_curves <- NULL
@@ -17,14 +18,12 @@ out_fitted_curves <- NULL
 
 for (clst in all_clusters){
   print(clst)
-  bats <- read_csv('Data/processed_data/combined_results_variant.csv') %>%
-    mutate(positive = ifelse(positive=="FALSE", 0, 1)) %>%
+  bats <- read_csv('data/combined_out_variant.csv') %>%
+    mutate(positive = ifelse(variant_positive=="FALSE", 0, 1)) %>%
     filter(type == clst) %>% arrange(date_end)
   
   t_all <- substr(bats$date_end, 1, 10) %>% ymd() %>% as.integer()
   t <- unique(t_all)
-  
-  # change the `by` argument for smoother visuals or shorter computation
   tnew <- seq(min(t-30), max(t + 30), by=10)
   
   N <- length(t)
@@ -46,7 +45,7 @@ for (clst in all_clusters){
   row_index <- matrix(rep(1:nrow(m), ncol(m)), nrow = nrow(m), ncol = ncol(m))
   col_index <- matrix(rep(1:ncol(m), nrow(m)), nrow = nrow(m), ncol = ncol(m), byrow = T)
   
-  fit <- stan("Scripts/stan/GP_withLL.stan",
+  fit <- stan("scripts/GP_withLL.stan",
               data = list(N1 = N,
                           N2 = length(tnew),
                           N_tot = nrow(bats),
@@ -70,70 +69,4 @@ for (clst in all_clusters){
   
 }
 
-
 write_csv(out_fitted_curves, file ="Data/results/cluster_curves.csv")
-out_fitted_curves <- read_csv('Data/results/cluster_curves.csv')
-#
-bats <- read_csv('Data/processed_data/combined_results_variant.csv') %>%
-  mutate(positive = ifelse(positive=="FALSE", 0, 1))
-#
-png("ClusterCurves5_v2.png", width = 16, height = 9, units = 'in', res = 1200)
-out_fitted_curves %>%
-  ggplot(aes(x = date, ymin = lower, ymax = upper, fill = cluster, y = median )) +
-  geom_ribbon(alpha = .3) + facet_grid(rows = vars(cluster)) +
-  geom_line(linetype = 3) +
-  theme_bw() +
-  xlab('') + ylab('Prevalence') +
-  theme(legend.position = 'none')+
-#dev.off() +
-  geom_rug(inherit.aes = F, aes(x = date), data = bats %>% mutate(date = as_date(date_end))) +
-  geom_rug(inherit.aes = F, aes(x = date), data = bats %>% filter(positive == 1) %>% mutate(date = as_date(date_end), cluster = type), color = 'red', sides = 'b') +
-  xlim(min(out_fitted_curves$date), max(out_fitted_curves$date)) +
-  scale_y_continuous(breaks=c(0,.10, .20)) +
-  annotate("rect", xmin = as_date('2018-06-21'), xmax = as_date('2018-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red") +
-  annotate("rect", xmin = as_date('2019-06-21'), xmax = as_date('2019-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red") +
-  annotate("rect", xmin = as_date('2020-06-21'), xmax = as_date('2020-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red") +
-  annotate("rect", xmin = as_date('2017-07-15'), xmax = as_date('2017-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red")
-dev.off()
-
-pdf("ClusterCurves5_v2.pdf", width = 16, height = 9)
-out_fitted_curves %>%
-  ggplot(aes(x = date, ymin = lower, ymax = upper, fill = cluster, y = median )) +
-  geom_ribbon(alpha = .3) + facet_grid(rows = vars(cluster)) +
-  geom_line(linetype = 3) +
-  theme_bw() +
-  xlab('') + ylab('Prevalence') +
-  theme(legend.position = 'none')+
-  #dev.off() +
-  geom_rug(inherit.aes = F, aes(x = date), data = bats %>% mutate(date = as_date(date_end))) +
-  geom_rug(inherit.aes = F, aes(x = date), data = bats %>% filter(positive == 1) %>% mutate(date = as_date(date_end), cluster = type), color = 'red', sides = 'b') +
-  xlim(min(out_fitted_curves$date), max(out_fitted_curves$date)) +
-  scale_y_continuous(breaks=c(0,.10, .20)) +
-  annotate("rect", xmin = as_date('2018-06-21'), xmax = as_date('2018-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red") +
-  annotate("rect", xmin = as_date('2019-06-21'), xmax = as_date('2019-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red") +
-  annotate("rect", xmin = as_date('2020-06-21'), xmax = as_date('2020-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red") +
-  annotate("rect", xmin = as_date('2017-07-15'), xmax = as_date('2017-09-21'), ymin = 0, ymax = .2,
-           alpha = .1,fill = "red")
-dev.off()
-
-# pdf("ClusterCurves6.pdf", width = 16, height = 9)
-# out_fitted_curves %>%
-#   ggplot(aes(x = date, ymin = lower, ymax = upper, fill = cluster, y = median, color = cluster )) +
-#   geom_ribbon(alpha = .3) +
-#   geom_line(linetype = 3) +
-#   theme_bw() +
-#   xlab('') + ylab('Prevalence') +
-#   theme(legend.position = 'none')+
-#   #dev.off() +
-#   geom_rug(inherit.aes = F, aes(x = date), data = bats %>% mutate(date = as_date(date_end))) +
-#   geom_rug(inherit.aes = F, aes(x = date), data = bats %>% filter(positive == 1) %>% mutate(date = as_date(date_end), cluster = type), color = 'red', sides = 'b') +
-#   xlim(min(out_fitted_curves$date), max(out_fitted_curves$date)) +
-#   scale_y_continuous(breaks=c(0,.10, .20))
-# dev.off()

@@ -93,5 +93,10 @@ for (iter in 1:nrow(bat_list)){
   out_mu <- out_mu %>% bind_rows(out_vals)
 }
 
-save(out_mu, out_fitted_curves, file = 'data/processed_data/logistic_curve_out.RData')
+out_fitted_curves <- out_fitted_curves |>
+  mutate(key = paste(as.character(date), type, age, species)) |>
+  filter(!duplicated(key)) |>
+  select(-key)
+
+save(out_mu, out_fitted_curves, file = 'data/model_output/logistic_curve_out.RData')
 
