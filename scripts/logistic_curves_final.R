@@ -22,6 +22,7 @@ bat_list <- read_csv('data/individual_variant_covariates.csv') %>%
 
 out_fitted_curves <- NULL
 out_mu <- NULL
+out_beta <- NULL
 
 for (iter in 1:nrow(bat_list)){
   print(iter) 
@@ -57,6 +58,9 @@ for (iter in 1:nrow(bat_list)){
   beta1_vals <- extract(fit)$beta1
   beta2_vals <- extract(fit)$beta2
   beta3_vals <- extract(fit)$beta3
+  beta1_2 <- beta1_vals - beta2_vals
+  beta1_3 <- beta1_vals - beta3_vals
+  beta2_3 <- beta2_vals - beta3_vals
   
   num_pts <- length(c(tmp$t,tnew))
   out_curves <- tibble(mean = c(pnorm(apply(z_vals + matrix(beta1_vals, nrow = nrow(z_vals), ncol = ncol(z_vals)), 2, mean)),
@@ -90,6 +94,12 @@ for (iter in 1:nrow(bat_list)){
                      age  = c('adult','juve','sub_adult'),
                      species = rep(bat_list[iter, 'bat_species']%>% pull(), 3))
   out_mu <- out_mu %>% bind_rows(out_vals)
+  
+  beta_diff <- tibble(vals = c(beta1_2, beta1_3, beta2_3),
+                        type = rep(c('beta1 - beta2', 'beta1 - beta3', 'beta2 - beta3'), each = 4000),
+                                                clade = rep(bat_list[iter,'type'] |> pull(), 4000 * 3),
+                      species = rep(bat_list[iter, 'bat_species']%>% pull(), 4000 * 3))
+  out_beta <- out_beta %>% bind_rows(beta_diff)
 }
 
 out_fitted_curves <- out_fitted_curves |>
@@ -97,5 +107,5 @@ out_fitted_curves <- out_fitted_curves |>
   filter(!duplicated(key)) |>
   select(-key)
 
-save(out_mu, out_fitted_curves, file = 'data/model_output/logistic_curve_out.RData')
+save(out_mu, out_fitted_curves,  out_beta, file = 'data/model_output/logistic_curve_out.RData')
 

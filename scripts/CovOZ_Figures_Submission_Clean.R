@@ -19,7 +19,7 @@ out_fitted_curves <- read_csv('data/model_output/cluster_curves.csv')
 bats <- read_csv('data/combined_out_variant.csv') %>%
   mutate(positive = ifelse(variant_positive=="FALSE", 0, 1))
 
-png("Figure2_final.png", width = 5, height = 6, units = 'in', res = 1500) 
+png("figures/Figure2_final.png", width = 5, height = 6, units = 'in', res = 1500) 
 out_fitted_curves %>%
   ggplot(aes(x = date, ymin = lower, ymax = upper, fill = cluster, colour = cluster,y = median )) +
   # REPRODUCTIVE SHADING
@@ -79,7 +79,7 @@ tmp <- out_fitted_curves %>%
          date3 = date(date2),
          year = as.character(year(date))) 
 
-png("Figure3_final.png", width = 9, height = 4, units = 'in', res = 800)
+png("figures/Figure3_final.png", width = 9, height = 4, units = 'in', res = 800)
 
 tmp %>% 
   filter(!cluster %in% c('beta 2d.i', 'beta 2d.vi') ) %>%
@@ -211,15 +211,15 @@ ghff_prev_plot <- ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying Fo
 ### ### ### ### ### ###
 ### Figures 4 C-D BFF and GHFF fitted curves  ####
 ### ### ### ### ### ###
-load('data/logistic_curve_out.RData') #loads out_fitted_curves
+load('data/model_output/logistic_curve_out.RData') #loads out_fitted_curves
 bats <- read_csv('data/individual_variant_covariates.csv')
 
 # GROUP BY FIRST DATE OF EACH SAMPLING SESSION
 bat_prop  <- bats %>% filter(bat_age %in% c('adult','juve','sub_adult') ) %>%
-  group_by(type, bat_age, bat_species, date_end) %>%
+  group_by(type, bat_age, bat_species, sampling_date) %>%
   summarize(n = n(), n_pos = sum(variant_positive), mean_pos = mean(variant_positive),
             .groups = 'drop') %>% 
-  rename(date = date_end)
+  rename(date = sampling_date)
 
 bff_curves <- out_fitted_curves %>%
   filter(species == 'bff', 
@@ -266,7 +266,7 @@ ghff_curves <- out_fitted_curves %>%
 ### ### ### ### ### ###
 ### Figure 4 - all combined ####
 ### ### ### ### ### ###
-png("Figure4_A-D_final.png", width = 12, height = 11.5, units = 'in', res = 1200)
+png("figures/Figure4_A-D_final.png", width = 12, height = 11.5, units = 'in', res = 1200)
 
 a_b <- plot_grid(bff_prev_plot,ghff_prev_plot, ncol=2, rel_widths = c(0.95,1), labels = c("A","B"))
 # Create a blank spacer plot
@@ -276,10 +276,10 @@ plot_grid(a_b,spacer_plot, c_d,nrow = 3, rel_heights = c(4.5,0.4,6))
 dev.off()
 
 ### ### ### ### ### ###
-### Figure 5 - Andy (or Dan?) has final code. Do we need to update this with new logistic curve output?
+### Figure 5 
 ### ### ### ### ### ###
 
-load('data/logistic_curve_out_417.RData') # should this change?
+load('data/model_output/logistic_curve_out_contrasts.RData') 
 
 out_beta <-   out_beta %>%
   bind_cols(tibble(clade_spec= rep(c('beta 2d.ii', 'beta 2d.iv', 'beta 2d.v'), each = 12000))) %>%
@@ -290,30 +290,37 @@ out_beta <-   out_beta %>%
   )) %>%
   mutate(contrast = case_when(
     type == 'beta1 - beta2' ~ 'Juvenile - Adult',
-    type == 'beta1 - beta3' ~ 'Subadult - Adult',
-    type == 'beta2 - beta3' ~ 'Juvenile - Subadult',
+    type == 'beta1 - beta3' ~ 'Sub-adult - Adult',
+    type == 'beta2 - beta3' ~ 'Juvenile - Sub-adult',
   ))
 
 probs <- out_beta %>% group_by(clade_spec, type) %>%
   summarize(prob = mean(vals2 > 0), .groups = 'drop' ) %>%
   mutate(contrast = case_when(
     type == 'beta1 - beta2' ~ 'Juvenile - Adult',
-    type == 'beta1 - beta3' ~ 'Subadult - Adult',
-    type == 'beta2 - beta3' ~ 'Juvenile - Subadult',
+    type == 'beta1 - beta3' ~ 'Sub-adult - Adult',
+    type == 'beta2 - beta3' ~ 'Juvenile - Sub-adult',
   ) )
 
-png("Figures/Figure6_AP.png", width = 8, height = 6, units = 'in', res = 1200)
-out_beta %>% ggplot(aes( x= vals2)) + geom_histogram(aes(y = after_stat(density)), binwidth = 0.1) +
+png("figures/Figure5.png", width = 8, height = 6, units = 'in', res = 1200)
+out_beta %>% ggplot(aes( x= vals2)) + 
+  geom_histogram(aes(y = after_stat(density)), binwidth = 0.1) +
   geom_vline(xintercept = 0, color = red_viridis) +
-  geom_text(aes(label = paste('Prob = ',round(prob,3), sep = ''), y = 1.5, x = -.75), data = probs,size = 3) +
+  #  geom_text(aes(label = paste('Prob = ',round(prob,3), sep = ''), y = 2, x = -.75), data = probs,size = 3) +
+  geom_text(aes(label = round(1 - prob,3), y = 2, x = -.85), data = probs,size = 3) +
+  geom_text(aes(label = round(prob,3), y = 2, x = .85), data = probs,size = 3) +
   facet_grid(contrast~ clade_spec, scales = "free_y") + theme_bw() +
-  geom_segment(aes(x=-.75, y=1.45, xend=.2, yend=.1), arrow = arrow(length=unit(0.25, 'cm'))) +
+  geom_segment(aes(x=-.1, y=2, xend=-.3, yend=2), arrow = arrow(length=unit(0.15, 'cm'))) +
+  geom_segment(aes(x=.1, y=2, xend=.3, yend=2), arrow = arrow(length=unit(0.15, 'cm'))) +
+  # geom_segment(aes(x=-.5, y=1.75, xend=-1.25, yend=1.75), arrow = arrow(length=unit(0.2, 'cm'))) +
+  # geom_segment(aes(x=.5, y=1.75, xend=1.25, yend=1.75), arrow = arrow(length=unit(0.2, 'cm'))) +
+  # # ggtitle('Contrast of Coefficients from Dynamic Binary Regression from BFF') +
+  # labs(caption = 'Prob corresponds to the probability that the first class is larger.') + 
+  # theme_minimal()+
   theme_cowplot()+
   xlab('')+
   ylab('Density')
-
 dev.off()
-
 
 ### ### ### ### ### ###
 ### Supp Figure 8 
@@ -334,7 +341,7 @@ bat_prop  <- bats %>%
 
 alpha_reproSI = c(0.01, 0.05, 0.10, 0.15) # lighter shading to allow for points
 
-png("SIFigure8.png", width = 6, height = 7, units = 'in', res = 1500) 
+png("figures/SIFigure8.png", width = 6, height = 7, units = 'in', res = 1500) 
 
 out_fitted_curves %>% 
   ggplot(aes(x = date, ymin = lower, ymax = upper, fill = cluster, colour = cluster,y = median )) +
@@ -381,17 +388,17 @@ dev.off()
 ### ### ### ### ### ###
 ### Supp Figure 9 
 ### ### ### ### ### ###
-load('data/logistic_curve_out.RData') 
+load('data/model_output/logistic_curve_out.RData') 
 bats <- read_csv('data/individual_variant_covariates.csv')
 
 # GROUP BY FIRST DATE OF EACH SAMPLING SESSION
 bat_prop  <- bats %>% filter(bat_age %in% c('adult','juve','sub_adult') ) %>% 
-  group_by(type, bat_age, bat_species, date_end) %>%
+  group_by(type, bat_age, bat_species, sampling_date) %>%
   summarize(n = n(), n_pos = sum(variant_positive), mean_pos = mean(variant_positive),
             .groups = 'drop') %>% 
-  rename(date = date_end)
+  rename(date = sampling_date)
 
-png("SIFigure9.png", width = 16, height = 7, units = 'in', res = 300)
+png("figures/SIFigure9.png", width = 16, height = 7, units = 'in', res = 300)
 
 bff_curves <- out_fitted_curves %>% 
   filter(species == 'bff', 
@@ -441,5 +448,4 @@ bff_curves <- out_fitted_curves %>%
 # BFF ONLY
 plot_grid(bff_curves, ncol=1) 
 dev.off()
- 
 
