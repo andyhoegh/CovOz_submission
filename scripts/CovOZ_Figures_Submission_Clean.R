@@ -266,7 +266,7 @@ ghff_curves <- out_fitted_curves %>%
 ### ### ### ### ### ###
 ### Figure 4 - all combined ####
 ### ### ### ### ### ###
-png("figures/Figure4_A-D_final.png", width = 12, height = 11.5, units = 'in', res = 1200)
+png("figures/Figure4_A-D_final.png", width = 12, height = 11.5, units = 'in', res = 400)
 
 a_b <- plot_grid(bff_prev_plot,ghff_prev_plot, ncol=2, rel_widths = c(0.95,1), labels = c("A","B"))
 # Create a blank spacer plot

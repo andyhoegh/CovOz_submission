@@ -1,6 +1,6 @@
 ### Reproducible Statistical Analysis README
 
-Instructions for running code associated with "Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and sub-adult bats"
+Instructions for running code associated with "Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and sub-adult bats." Figures from the manuscript can be recreated using the "CovOZ_Figures_Submission_Clean.R" script.
 
 
 ### Coinfection Analysis
