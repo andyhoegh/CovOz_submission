@@ -4,9 +4,10 @@
 ############################################################################################################
 ############################################################################################################
 
-
 library(tidyverse)
 library(lubridate)
+library(tictoc)
+tic('coinfection')
 
 individual_variant_covariates <- read_csv("data/individual_variant_covariates.csv")
 
@@ -53,12 +54,18 @@ Xsq <- chisq.test(bff_wide$`beta 2d.iv`, bff_wide$`beta 2d.v`, simulate.p.value 
 ### 3- way Chi-Squared Test with age
 ####################################
 
-bats_iv <- bats %>% filter(type == 'beta 2d.iv') %>% 
-  rename(positive_iv = variant_positive) %>% select(key, positive_iv, bat_age) %>%
+bats_iv <- individual_variant_covariates %>% 
+  filter(type == 'beta 2d.iv') %>% 
+  rename(positive_iv = variant_positive) %>% 
+  mutate(key = paste(accession_update, '-', sample_id, sep = '')) |>
+           select(key, positive_iv, bat_age) %>%
   filter(bat_age %in% c('adult','juve','sub_adult'))
 
-bats_v <- bats %>% filter(type == 'beta 2d.v') %>% 
-  rename(positive_v = variant_positive) %>% select(key, positive_v, bat_age) %>%
+bats_v <- individual_variant_covariates %>% 
+  filter(type == 'beta 2d.v') %>% 
+  rename(positive_v = variant_positive) %>% 
+  mutate(key = paste(accession_update, '-', sample_id, sep = '')) |>
+  select(key, positive_v, bat_age) %>%
   filter(bat_age %in% c('adult','juve','sub_adult'))
 
 comb <- bats_iv %>% left_join(bats_v, by = 'key')
@@ -127,3 +134,4 @@ observed_matrix_juve <- matrix(c(comb_juve %>% filter(!positive_iv, !positive_v)
 
 chisq_juve <- sum(((observed_matrix_juve - expected_matrix_juve) / sqrt(expected_matrix_juve))^2)
 1- pchisq(chisq_juve,1)
+toc()
