@@ -4,7 +4,9 @@ library(cowplot)
 library(ggtext)
 library(jpeg)
 library(scales)
+library(tictoc)
 
+tic('make figs')
 #### Load colours and names ####
 colours_clades6 <- c("#191919",viridis_pal(option = "B")(6)[2:5], "#fff207") 
 colours_clades4 <- colours_clades6[2:5]
@@ -449,3 +451,4 @@ bff_curves <- out_fitted_curves %>%
 plot_grid(bff_curves, ncol=1) 
 dev.off()
 
+toc()
