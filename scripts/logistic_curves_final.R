@@ -8,6 +8,9 @@ library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
 library(lubridate)
+library(tictoc)
+
+tic('logistic_curves_final')
 
 bat_list <- read_csv('data/individual_variant_covariates.csv') %>%
   filter(!is.na(bat_age), bat_age != 'BLANK') |>
@@ -54,10 +57,10 @@ for (iter in 1:nrow(bat_list)){
                           ig_beta = 1198.18),
               iter = 2000, chains=4, seed=1222021)
   
-  z_vals <- extract(fit)$z
-  beta1_vals <- extract(fit)$beta1
-  beta2_vals <- extract(fit)$beta2
-  beta3_vals <- extract(fit)$beta3
+  z_vals <- rstan::extract(fit)$z
+  beta1_vals <-  rstan::extract(fit)$beta1
+  beta2_vals <-  rstan::extract(fit)$beta2
+  beta3_vals <-  rstan::extract(fit)$beta3
   beta1_2 <- beta1_vals - beta2_vals
   beta1_3 <- beta1_vals - beta3_vals
   beta2_3 <- beta2_vals - beta3_vals
@@ -109,3 +112,4 @@ out_fitted_curves <- out_fitted_curves |>
 
 save(out_mu, out_fitted_curves,  out_beta, file = 'data/model_output/logistic_curve_out.RData')
 
+toc()

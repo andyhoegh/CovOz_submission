@@ -70,6 +70,7 @@ Runs individual level dynamic binary regression models. Produces output file tha
   - logistic_curves_final.R
   - GP_regression.stan
 - output files: logistic_curve_out.RData
+- run time: approximately 66 minutes
   
   
 #### 4.3 Dynamics of Circulation at the Population Level
