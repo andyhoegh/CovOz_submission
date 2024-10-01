@@ -7,8 +7,9 @@ library(tidyverse)
 library(lubridate)
 library(stringr)
 library(rstan)
+library(tictoc)
 options(mc.cores = parallel::detectCores())
-
+tic('cluster curves')
 combined_out_variant <- read_csv('data/combined_out_variant.csv')
 
 all_clusters <- c('beta 2d.i', "beta 2d.ii", 'beta 2d.iii', 'beta 2d.iv', 'beta 2d.v', 'beta 2d.vi')
@@ -59,7 +60,7 @@ for (clst in all_clusters){
                           ig_alpha = 18.51,
                           ig_beta = 1198.18),
               iter = 2000, chains=4, seed=1222021)
-  z_vals3 <- extract(fit)$z
+  z_vals3 <- rstan::extract(fit)$z
   out_curves <- tibble(median = pnorm(apply(z_vals3[1:4000,], 2, median)),
                        lower =  pnorm(apply(z_vals3[1:4000,], 2, quantile, prob = .025)),
                        upper =  pnorm(apply(z_vals3[1:4000,], 2, quantile, prob = .975)),
@@ -70,3 +71,5 @@ for (clst in all_clusters){
 }
 
 write_csv(out_fitted_curves, file ="data/model_output/cluster_curves.csv")
+
+toc()

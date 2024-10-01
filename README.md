@@ -60,6 +60,7 @@ Runs chi-squared tests on coinfections of beta 2d.iv and beta 2d.v. Generates su
 
 - input files: individual_variant_covariates.csv
 - script file: coinfection_final.R
+- run time: approximately 1 second
 
 #### 4.2 Individual Level Dynamics of Infection: Dynamic Binary Regression
 
@@ -82,7 +83,7 @@ Runs combined (individual and pooled data) dynamic models. Produces output file 
   - cluster_curves_final.R
   - GP_withLL.stan
 - output files: cluster_curves.csv
-
+- run time: approximately 25 minutes
 
 #### 4.4 Manuscript Figures
 
@@ -108,3 +109,4 @@ Combined script that uses output files created by previous scripts to recreate a
   - SIFigure8.png
   - SIFigure9.png
 
+- run time: approximately 16 seconds
