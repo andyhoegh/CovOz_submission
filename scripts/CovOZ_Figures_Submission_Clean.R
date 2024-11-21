@@ -122,11 +122,9 @@ dev.off()
 ### ### ### ### ### ###
 ### Figure 4 A-B (individual bar plot prevalence)  ####
 ### ### ### ### ### ###
-
 # read data
 df <- read.csv('data/individual_variant_covariates.csv')
 
-### create a barplot with prevalence ###
 # get positive results 
 df1 <- df %>%
   group_by(bat_age, bat_species,type, variant_positive) %>%
@@ -157,56 +155,104 @@ df_plot1 <- merge(df_plotNew, df1, by = c('bat_species', 'bat_age','type'), all.
   mutate(bat_age= factor(bat_age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))) %>% 
   mutate(prevalence = (signif(positive/total_tested, digits = 2)*100)) %>% 
   rowwise() %>% 
-  mutate(lci = binom.test(x = positive,n = total_tested)$conf.int[[1]]*100,
-         uci = binom.test(x = positive,n = total_tested)$conf.int[[2]]*100)
+  mutate(lci = binom.test(x = positive, n = total_tested)$conf.int[[1]]*100,
+         uci = binom.test(x = positive, n = total_tested)$conf.int[[2]]*100,
+         bayes_low = qbeta(.025, positive + 1, total_tested + 2) * 100,
+         bayes_high = qbeta(.975, positive + 1, total_tested + 2) * 100) |>
+  mutate(bayes_low = case_when(
+    bat_species == 'ghff' & type == 'beta 2d.iii' & bat_age == 'Subadult' ~ qbeta(.05, positive + 1, total_tested + 2) * 100,
+    TRUE ~ bayes_low
+  ), bayes_high = case_when(
+    bat_species == 'ghff' & type == 'beta 2d.iii' & bat_age == 'Subadult' ~ qbeta(1, positive + 1, total_tested + 2) * 100,
+    TRUE ~ bayes_high
+  )
+  )
+
+
 
 levels(df_plot1$type) <- gsub("beta ", "", levels(df_plot1$type), fixed=TRUE)
 
 df_plot1$bat_species <- ifelse(df_plot1$bat_species == 'bff', 'Black Flying Fox',
                                'Grey-Headed Flying Fox')
 
-bff_prev_plot <- ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) +  
-  aes(y = fct_rev(type), x = prevalence, fill = type) +
-  geom_col(alpha = 0.6) +
-  geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,width = 0.15, position = position_dodge(0.5))+
+ghff_prev_plot <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying Fox')) +  
+  aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
+  #geom_col(alpha = 0.6) +
+  # geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,  position = position_dodge(0.5)) +
+  geom_pointrange(aes(xmin = bayes_low, xmax = bayes_high), alpha = 0.8, fatten = 3, linewidth = 5) + 
   geom_vline(xintercept=0)+
-  geom_segment(aes(y=0.41,yend=0.41, x=0, xend=20))+
-  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
-            position=position_dodge(width=0.5),
-            vjust=0.4) +
-  scale_fill_manual(values = colours_clades6)+
+  geom_segment(aes(y=0.41,yend=0.41, x=0, xend=100), color = 'black') +
+  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = uci + 5), size = 3.5,
+            vjust=0.4, , color = 'black') +
+  geom_point(color = 'white') +  
+  # geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
+  #           position=position_dodge(width=0.5),
+  #           vjust=0.4, , color = 'black') +
+  scale_color_manual(values = colours_clades6)+
   labs(y = "", x = "Prevalence (%)",fill="Clade") +
-  theme_set(theme_cowplot())+
+  theme_minimal()+
   theme(legend.position = "none",
-        panel.spacing.x = unit(0.5, "lines"),
+        panel.spacing.x = unit(0.1, "lines"),
         axis.line.x = element_blank(),
         axis.line.y = element_blank(),
         axis.ticks.y=element_blank(),
         axis.text.y=element_text(face = "bold"),
         plot.margin = margin(5.5, 5.5, 0, 5.5)) +
-  scale_x_continuous(breaks = seq(0,25, 5), limits = c(-1.2,20)) +
+  scale_x_continuous(breaks = seq(0,100, 25), limits = c(-1,105)) +
   facet_grid(bat_age~bat_species, scales = 'free')
 
-ghff_prev_plot <- ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying Fox')) +  
-  aes(y = fct_rev(type), x = prevalence, fill = type) +
-  geom_col(alpha = 0.6) +
-  geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,width = 0.15, position = position_dodge(0.5))+
+
+ghff_prev_plot2 <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying Fox')) +  
+  aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
+  #geom_col(alpha = 0.6) +
+  # geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,  position = position_dodge(0.5)) +
+  geom_pointrange(aes(xmin = bayes_low, xmax = bayes_high), alpha = 0.8, fatten = 3, linewidth = 5) + 
   geom_vline(xintercept=0)+
-  geom_segment(aes(y=0.41,yend=0.41, x=0, xend=100))+
-  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 0)), '%', sep = ''), x = -6), size = 3.5,
-            position=position_dodge(width=0.5),
-            vjust=0.4) +
-  scale_fill_manual(values = colours_clades6)+
+  geom_segment(aes(y=0.41,yend=0.41, x=0, xend=100), color = 'black') +
+  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = uci + 5), size = 3.5,
+            vjust=0.4, , color = 'black') +
+  geom_point(color = 'white') +  
+  # geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
+  #           position=position_dodge(width=0.5),
+  #           vjust=0.4, , color = 'black') +
+  scale_color_manual(values = colours_clades6)+
   labs(y = "", x = "Prevalence (%)",fill="Clade") +
-  theme_set(theme_cowplot())+
-  theme(#legend.position = "none",
-    panel.spacing.x = unit(0.5, "lines"),
-    axis.line.x = element_blank(),
-    axis.line.y = element_blank(),
-    axis.ticks.y=element_blank(),
-    axis.text.y=element_blank(),
-    plot.margin = margin(5.5, 5.5, 0, 5.5)) +
-  scale_x_continuous(breaks = seq(0,100, 25), limits = c(-6,100)) +
+  theme_minimal()+
+  theme(legend.position = "none",
+        panel.spacing.x = unit(0.1, "lines"),
+        axis.line.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_text(face = "bold"),
+        plot.margin = margin(5.5, 5.5, 0, 5.5)) +
+  scale_x_continuous(breaks = seq(0,100, 25), limits = c(-1,105)) +
+  facet_grid(bat_age~bat_species, scales = 'free')
+
+
+bff_prev_plot <-   ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) +  
+  aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
+  #geom_col(alpha = 0.6) +
+  # geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,  position = position_dodge(0.5)) +
+  geom_pointrange(aes(xmin = lci, xmax = uci), alpha = 0.8, fatten = 3, linewidth = 5) + 
+  geom_vline(xintercept=0)+
+  geom_segment(aes(y=0.41,yend=0.41, x=0, xend=20), color = 'black') +
+  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = uci + 1), size = 3.5,
+            vjust=0.4, , color = 'black') +
+  geom_point(color = 'white') +  
+  # geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
+  #           position=position_dodge(width=0.5),
+  #           vjust=0.4, , color = 'black') +
+  scale_color_manual(values = colours_clades6)+
+  labs(y = "", x = "Prevalence (%)",fill="Clade") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        panel.spacing.x = unit(0.1, "lines"),
+        axis.line.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_text(face = "bold"),
+        plot.margin = margin(5.5, 5.5, 0, 5.5)) +
+  scale_x_continuous(breaks = seq(0,25, 5), limits = c(-.1,20)) +
   facet_grid(bat_age~bat_species, scales = 'free')
 
 
@@ -237,7 +283,7 @@ bff_curves <- out_fitted_curves %>%
   scale_colour_manual(values = colours_clades4)+
   scale_size_continuous(range = c(1/3,25/3), breaks = seq(0, 25, by = 5),'# samples')+
   scale_x_date(breaks = seq(as.Date("2018-03-01"), as.Date("2020-03-01"), by = "12 months"), date_labels = "%b\n%Y",limits = c(as.Date("2017-07-01"), as.Date("2021-02-01"))) +
-  theme_set(theme_cowplot())+
+  theme_minimal() +
   xlab('') + ylab('Prevalence') +
   labs(subtitle = "Black flying foxes\n")+
   theme(plot.subtitle = element_text(hjust = 0.5))+
@@ -258,7 +304,7 @@ ghff_curves <- out_fitted_curves %>%
   scale_colour_manual(values = colours_clades4)+
   scale_size_continuous(range = c(1/5,25/5), breaks = seq(0, 25, by = 5),'# samples')+
   scale_x_date(breaks = seq(as.Date("2018-07-01"), as.Date("2020-07-01"), by = "12 months"), date_labels = "%b\n%Y",limits = c(as.Date("2017-11-01"), as.Date("2019-06-01"))) +
-  theme_set(theme_cowplot())+
+  theme_minimal() +
   theme(plot.subtitle = element_text(hjust = 0.5))+
   xlab('') + ylab('') +
   labs(subtitle = "Grey-headed\nflying foxes")+
