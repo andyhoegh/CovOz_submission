@@ -21,48 +21,48 @@ bff_wide <- individual_variants_wide |>
   filter(bat_species == 'bff') 
 
 bff_coinfections <- bff_wide |>
-  mutate(infections = `beta 2d.i` + `beta 2d.ii` + `beta 2d.iii` + `beta 2d.iv` + `beta 2d.v` + `beta 2d.vi`) |>
+  mutate(infections = beta_2d_i + beta_2d_ii + beta_2d_iii + beta_2d_iv + beta_2d_v + beta_2d_vi) |>
   filter(infections > 1) |>
   tally()
 
 ghff_coinfections <- individual_variants_wide |>
   filter(bat_species == 'ghff') |>
-  mutate(infections = `beta 2d.i` + `beta 2d.ii` + `beta 2d.iii` + `beta 2d.iv` + `beta 2d.v` + `beta 2d.vi`) |>
+  mutate(infections = beta_2d_i + beta_2d_ii + beta_2d_iii + beta_2d_iv + beta_2d_v + beta_2d_vi) |>
   filter(infections > 1) |>
   tally()
 
 bff_beta2d_iv <- bff_wide |>
-  filter(`beta 2d.iv`) |>
+  filter(beta_2d_iv) |>
   tally()
   
 bff_beta2d_v <- bff_wide |>
-  filter(`beta 2d.v`) |>
+  filter(beta_2d_v) |>
   tally()
 
 bff_beta2d_iv_v_coinfection <- bff_wide |>
-  filter(`beta 2d.iv` & `beta 2d.v`) |>
+  filter(beta_2d_iv & beta_2d_v) |>
   tally()
 
 ####################################
 ### 2- way Chi-Squared Test
 ####################################
 
-table(bff_wide$`beta 2d.iv`, bff_wide$`beta 2d.v`)
-Xsq <- chisq.test(bff_wide$`beta 2d.iv`, bff_wide$`beta 2d.v`, simulate.p.value = TRUE)
+table(bff_wide$beta_2d_iv, bff_wide$beta_2d_v)
+Xsq <- chisq.test(bff_wide$beta_2d_iv, bff_wide$beta_2d_v, simulate.p.value = TRUE)
 
 ####################################
 ### 3- way Chi-Squared Test with age
 ####################################
 
 bats_iv <- individual_variant_covariates %>% 
-  filter(type == 'beta 2d.iv') %>% 
+  filter(type == 'beta_2d_iv') %>% 
   rename(positive_iv = variant_positive) %>% 
   mutate(key = paste(accession_update, '-', sample_id, sep = '')) |>
            select(key, positive_iv, bat_age) %>%
   filter(bat_age %in% c('adult','juve','sub_adult'))
 
 bats_v <- individual_variant_covariates %>% 
-  filter(type == 'beta 2d.v') %>% 
+  filter(type == 'beta_2d_v') %>% 
   rename(positive_v = variant_positive) %>% 
   mutate(key = paste(accession_update, '-', sample_id, sep = '')) |>
   select(key, positive_v, bat_age) %>%
