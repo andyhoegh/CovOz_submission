@@ -110,3 +110,14 @@ Combined script that uses output files created by previous scripts to recreate a
   - SIFigure9.png
 
 - run time: approximately 16 seconds
+
+#### 4.5 Model Comparison
+
+Compares LOOIC values for sets of model frameworks.
+
+- input files: combined_out_variant.csv
+- script files:
+  - Pred_Comparisons.R
+  - GP_withLL.stan
+- output files: preds.RData
+- run time: approximately 2 hours
