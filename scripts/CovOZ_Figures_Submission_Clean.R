@@ -168,8 +168,6 @@ df_plot1 <- merge(df_plotNew, df1, by = c('bat_species', 'bat_age','type'), all.
   )
   )
 
-
-
 levels(df_plot1$type) <- gsub("beta ", "", levels(df_plot1$type), fixed=TRUE)
 
 df_plot1$bat_species <- ifelse(df_plot1$bat_species == 'bff', 'Black Flying Fox',
@@ -201,7 +199,6 @@ ghff_prev_plot <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying F
   scale_x_continuous(breaks = seq(0,100, 25), limits = c(-1,105)) +
   facet_grid(bat_age~bat_species, scales = 'free')
 
-
 ghff_prev_plot2 <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying Fox')) +  
   aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
   #geom_col(alpha = 0.6) +
@@ -227,7 +224,6 @@ ghff_prev_plot2 <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying 
         plot.margin = margin(5.5, 5.5, 0, 5.5)) +
   scale_x_continuous(breaks = seq(0,100, 25), limits = c(-1,105)) +
   facet_grid(bat_age~bat_species, scales = 'free')
-
 
 bff_prev_plot <-   ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) +  
   aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
@@ -271,11 +267,11 @@ bat_prop  <- bats %>% filter(bat_age %in% c('adult','juve','sub_adult') ) %>%
 
 bff_curves <- out_fitted_curves %>%
   filter(species == 'bff', 
-         type %in% c('beta 2d.ii', 'beta 2d.iv','beta 2d.v', 'beta 2d.vi')) %>% 
+         type %in% c('beta_2d_ii', 'beta_2d_iv','beta_2d_v', 'beta_2d_vi')) %>% 
   ggplot(aes(x = date, ymin = lower, ymax = upper, fill = type, colour = type, y = mean )) +
   geom_point(inherit.aes = F, aes(x = date, y = mean_pos, size = n), shape = 1, 
              data = bat_prop %>% filter(bat_species == 'bff',
-                                        type %in% c('beta 2d.ii', 'beta 2d.iv','beta 2d.v', 'beta 2d.vi')) %>% mutate(age = bat_age), alpha = .25) +
+                                        type %in% c('beta_2d_ii', 'beta_2d_iv','beta_2d_v', 'beta_2d_vi')) %>% mutate(age = bat_age), alpha = .25) +
   geom_ribbon(alpha = .4,linewidth=0) +
   geom_line(lty = 1,linewidth = 1.2) +
   facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))~type) +
@@ -292,11 +288,11 @@ bff_curves <- out_fitted_curves %>%
 
 ghff_curves <- out_fitted_curves %>%
   filter(species == 'ghff', 
-         type %in% c('beta 2d.iii')) %>% 
+         type %in% c('beta_2d_iii')) %>% 
   ggplot(aes(x = date, ymin = lower, ymax = upper, fill = type, colour = type, y = mean )) +
   geom_point(inherit.aes = F, aes(x = date, y = mean_pos, size = n),  shape = 1,
              data = bat_prop %>% filter(bat_species == 'ghff',
-                                        type %in% c('beta 2d.iii')) %>% mutate(age = bat_age), alpha = .25) +
+                                        type %in% c('beta_2d_iii')) %>% mutate(age = bat_age), alpha = .25) +
   geom_ribbon(alpha = .4,linewidth=0) +
   geom_line(lty = 1,linewidth = 1.2) +
   facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))~type) +
@@ -450,7 +446,7 @@ png("figures/SIFigure9.png", width = 16, height = 7, units = 'in', res = 300)
 
 bff_curves <- out_fitted_curves %>% 
   filter(species == 'bff', 
-         type %in% c('beta 2d.ii', 'beta 2d.iv','beta 2d.v', 'beta 2d.vi')) %>% 
+         type %in% c('beta_2d_ii', 'beta_2d_iv','beta_2d_v', 'beta_2d_vi')) %>% 
   ggplot(aes(x = date, ymin = lower, ymax = upper, fill = type, colour = type, y = mean )) +
   # REPRODUCTIVE SHADING
   # mating shading
@@ -479,7 +475,7 @@ bff_curves <- out_fitted_curves %>%
   geom_line(lty = 1,linewidth = 1.2) +
   geom_jitter(inherit.aes = F, aes(x = date, y = mean_pos, size = n, colour = type),shape = 1, width = 4,height = 0,
               data = bat_prop %>% filter(bat_species == 'bff',
-                                         type %in% c('beta 2d.ii', 'beta 2d.iv','beta 2d.v', 'beta 2d.vi')) %>% mutate(age = bat_age)) + 
+                                         type %in% c('beta_2d_ii', 'beta_2d_iv','beta_2d_v', 'beta_2d_vi')) %>% mutate(age = bat_age)) + 
   facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))~type) +
   scale_fill_manual(values = colours_clades6[c(2,4,5,6)])+
   scale_colour_manual(values = colours_clades6[c(2,4,5,6)])+
