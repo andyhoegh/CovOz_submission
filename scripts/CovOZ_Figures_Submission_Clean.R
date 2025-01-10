@@ -146,7 +146,7 @@ df2 <- df %>%
 # create a full grid of combinations 
 df_plotNew <- expand.grid(bat_species = c('bff', 'ghff'), 
                           bat_age = c('juve', 'sub_adult', 'adult'),
-                          type = c('beta 2d.i','beta 2d.ii','beta 2d.iii', 'beta 2d.iv', 'beta 2d.v', 'beta 2d.vi'))
+                          type = c('beta_2d_i','beta_2d_ii','beta_2d_iii', 'beta_2d_iv', 'beta_2d_v', 'beta_2d_vi'))
 
 ###
 df_plot1 <- merge(df_plotNew, df1, by = c('bat_species', 'bat_age','type'), all.x=TRUE) %>%
@@ -160,15 +160,15 @@ df_plot1 <- merge(df_plotNew, df1, by = c('bat_species', 'bat_age','type'), all.
          bayes_low = qbeta(.025, positive + 1, total_tested + 2) * 100,
          bayes_high = qbeta(.975, positive + 1, total_tested + 2) * 100) |>
   mutate(bayes_low = case_when(
-    bat_species == 'ghff' & type == 'beta 2d.iii' & bat_age == 'Subadult' ~ qbeta(.05, positive + 1, total_tested + 2) * 100,
+    bat_species == 'ghff' & type == 'beta_2d_iii' & bat_age == 'Subadult' ~ qbeta(.05, positive + 1, total_tested + 2) * 100,
     TRUE ~ bayes_low
   ), bayes_high = case_when(
-    bat_species == 'ghff' & type == 'beta 2d.iii' & bat_age == 'Subadult' ~ qbeta(1, positive + 1, total_tested + 2) * 100,
+    bat_species == 'ghff' & type == 'beta_2d_iii' & bat_age == 'Subadult' ~ qbeta(1, positive + 1, total_tested + 2) * 100,
     TRUE ~ bayes_high
   )
   )
 
-levels(df_plot1$type) <- gsub("beta ", "", levels(df_plot1$type), fixed=TRUE)
+levels(df_plot1$type) <- gsub("beta_", "", levels(df_plot1$type), fixed=TRUE)
 
 df_plot1$bat_species <- ifelse(df_plot1$bat_species == 'bff', 'Black Flying Fox',
                                'Grey-Headed Flying Fox')
@@ -323,9 +323,55 @@ dev.off()
 ### Figure 5 
 ### ### ### ### ### ###
 
-load('data/model_output/logistic_curve_out_contrasts.RData') 
+# load('data/model_output/logistic_curve_out_contrasts.RData') 
+# out_beta <-   out_beta %>%
+#   bind_cols(tibble(clade_spec= rep(c('beta 2d.ii', 'beta 2d.iv', 'beta 2d.v'), each = 12000))) %>%
+#   mutate(vals2 = case_when(
+#     type == 'beta1 - beta2' ~ -1 * vals,
+#     type == 'beta1 - beta3' ~ -1 * vals,
+#     type == 'beta2 - beta3' ~ vals
+#   )) %>%
+#   mutate(contrast = case_when(
+#     type == 'beta1 - beta2' ~ 'Juvenile - Adult',
+#     type == 'beta1 - beta3' ~ 'Sub-adult - Adult',
+#     type == 'beta2 - beta3' ~ 'Juvenile - Sub-adult',
+#   ))
+# 
+# probs <- out_beta %>% group_by(clade_spec, type) %>%
+#   summarize(prob = mean(vals2 > 0), .groups = 'drop' ) %>%
+#   mutate(contrast = case_when(
+#     type == 'beta1 - beta2' ~ 'Juvenile - Adult',
+#     type == 'beta1 - beta3' ~ 'Sub-adult - Adult',
+#     type == 'beta2 - beta3' ~ 'Juvenile - Sub-adult',
+#   ) )
+# 
+# png("figures/Figure5.png", width = 8, height = 6, units = 'in', res = 1200)
+# out_beta %>% ggplot(aes( x= vals2)) +
+#   geom_histogram(aes(y = after_stat(density)), binwidth = 0.1) +
+#   geom_vline(xintercept = 0, color = red_viridis) +
+#   #  geom_text(aes(label = paste('Prob = ',round(prob,3), sep = ''), y = 2, x = -.75), data = probs,size = 3) +
+#   geom_text(aes(label = round(1 - prob,3), y = 2, x = -.85), data = probs,size = 3) +
+#   geom_text(aes(label = round(prob,3), y = 2, x = .85), data = probs,size = 3) +
+#   facet_grid(contrast~ ~fct_relevel(clade_spec,'beta 2d.ii', 'beta 2d.iv', 'beta 2d.v'), scales = "free_y") + 
+#   theme_bw() +
+#   geom_segment(aes(x=-.1, y=2, xend=-.3, yend=2), arrow = arrow(length=unit(0.15, 'cm'))) +
+#   geom_segment(aes(x=.1, y=2, xend=.3, yend=2), arrow = arrow(length=unit(0.15, 'cm'))) +
+#   # geom_segment(aes(x=-.5, y=1.75, xend=-1.25, yend=1.75), arrow = arrow(length=unit(0.2, 'cm'))) +
+#   # geom_segment(aes(x=.5, y=1.75, xend=1.25, yend=1.75), arrow = arrow(length=unit(0.2, 'cm'))) +
+#   # # ggtitle('Contrast of Coefficients from Dynamic Binary Regression from BFF') +
+#   # labs(caption = 'Prob corresponds to the probability that the first class is larger.') +
+#   # theme_minimal()+
+#   theme_cowplot()+
+#   xlab('')+
+#   ylab('Density')
+#  dev.off()
 
-out_beta <-   out_beta %>%
+load('data/model_output/logistic_curve_out.RData') 
+out_beta_github <-
+
+out_beta <- out_beta |> 
+  filter(species == 'bff') |> 
+  filter(clade %in% c('beta_2d_ii', 'beta_2d_iv', 'beta_2d_v')) %>%
   bind_cols(tibble(clade_spec= rep(c('beta 2d.ii', 'beta 2d.iv', 'beta 2d.v'), each = 12000))) %>%
   mutate(vals2 = case_when(
     type == 'beta1 - beta2' ~ -1 * vals,
