@@ -95,8 +95,7 @@ Combined script that uses output files created by previous scripts to recreate a
   - combined_out_variant.csv
   - individual_variant_covariates.csv
   - model_output/logistic_curve_out.RData
-  - model_output/logistic_curve_out_contrasts.RData
-  
+
 - script files:
   - CovOZ_Figures_Submission_Clean.R
 
