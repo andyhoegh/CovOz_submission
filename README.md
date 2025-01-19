@@ -110,7 +110,7 @@ Combined script that uses output files created by previous scripts to recreate a
 
 - run time: approximately 16 seconds
 
-#### 4.5 Model Comparison
+#### 4.5 Model Comparison Integrated
 
 Compares LOOIC values for sets of model frameworks.
 
@@ -120,3 +120,19 @@ Compares LOOIC values for sets of model frameworks.
   - GP_withLL.stan
 - output files: preds.RData
 - run time: approximately 2 hours
+
+#### 4.6 Model Comparison Individual
+
+Compares LOOIC values for sets of model frameworks.
+
+- input files: combined_out_variant.csv
+- script files:
+  - logistic_curves_loo.R
+  - GP_regression.stan
+  - GP_regression_add.stan
+  - GP_regression_interact.stan
+- output files: 
+  - logistic_curve_loo_age.RData
+  - logistic_curve_loo_age_add_sex.RData
+  - logistic_curve_loo_age_interact_sex.RData
+- run time: approximately 6:45 hours
