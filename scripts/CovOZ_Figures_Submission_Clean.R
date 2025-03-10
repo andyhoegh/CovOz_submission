@@ -152,7 +152,7 @@ df_plotNew <- expand.grid(bat_species = c('bff', 'ghff'),
 df_plot1 <- merge(df_plotNew, df1, by = c('bat_species', 'bat_age','type'), all.x=TRUE) %>%
   mutate(positive = ifelse(is.na(positive), 0,positive)) %>%
   right_join(., df2, by = c('bat_species', 'bat_age')) %>%
-  mutate(bat_age= factor(bat_age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))) %>% 
+  mutate(bat_age= factor(bat_age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Sub-adult','Adult'))) %>% 
   mutate(prevalence = (signif(positive/total_tested, digits = 2)*100)) %>% 
   rowwise() %>% 
   mutate(lci = binom.test(x = positive, n = total_tested)$conf.int[[1]]*100,
@@ -160,10 +160,10 @@ df_plot1 <- merge(df_plotNew, df1, by = c('bat_species', 'bat_age','type'), all.
          bayes_low = qbeta(.025, positive + 1, total_tested + 2) * 100,
          bayes_high = qbeta(.975, positive + 1, total_tested + 2) * 100) |>
   mutate(bayes_low = case_when(
-    bat_species == 'ghff' & type == 'beta_2d_iii' & bat_age == 'Subadult' ~ qbeta(.05, positive + 1, total_tested + 2) * 100,
+    bat_species == 'ghff' & type == 'beta_2d_iii' & bat_age == 'Sub-adult' ~ qbeta(.05, positive + 1, total_tested + 2) * 100,
     TRUE ~ bayes_low
   ), bayes_high = case_when(
-    bat_species == 'ghff' & type == 'beta_2d_iii' & bat_age == 'Subadult' ~ qbeta(1, positive + 1, total_tested + 2) * 100,
+    bat_species == 'ghff' & type == 'beta_2d_iii' & bat_age == 'Sub-adult' ~ qbeta(1, positive + 1, total_tested + 2) * 100,
     TRUE ~ bayes_high
   )
   )
@@ -180,7 +180,7 @@ ghff_prev_plot <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying F
   geom_pointrange(aes(xmin = bayes_low, xmax = bayes_high), alpha = 0.8, fatten = 3, linewidth = 5) + 
   geom_vline(xintercept=0)+
   geom_segment(aes(y=0.41,yend=0.41, x=0, xend=100), color = 'black') +
-  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = uci + 5), size = 3.5,
+  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = bayes_high + 5), size = 3.5,
             vjust=0.4, , color = 'black') +
   geom_point(color = 'white') +  
   # geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
@@ -188,7 +188,7 @@ ghff_prev_plot <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying F
   #           vjust=0.4, , color = 'black') +
   scale_color_manual(values = colours_clades6)+
   labs(y = "", x = "Prevalence (%)",fill="Clade") +
-  theme_minimal()+
+  theme_cowplot() + # theme_minimal()+
   theme(legend.position = "none",
         panel.spacing.x = unit(0.1, "lines"),
         axis.line.x = element_blank(),
@@ -196,43 +196,17 @@ ghff_prev_plot <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying F
         axis.ticks.y=element_blank(),
         axis.text.y=element_text(face = "bold"),
         plot.margin = margin(5.5, 5.5, 0, 5.5)) +
-  scale_x_continuous(breaks = seq(0,100, 25), limits = c(-1,105)) +
-  facet_grid(bat_age~bat_species, scales = 'free')
-
-ghff_prev_plot2 <-  ggplot(df_plot1 %>% filter(bat_species=='Grey-Headed Flying Fox')) +  
-  aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
-  #geom_col(alpha = 0.6) +
-  # geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,  position = position_dodge(0.5)) +
-  geom_pointrange(aes(xmin = bayes_low, xmax = bayes_high), alpha = 0.8, fatten = 3, linewidth = 5) + 
-  geom_vline(xintercept=0)+
-  geom_segment(aes(y=0.41,yend=0.41, x=0, xend=100), color = 'black') +
-  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = uci + 5), size = 3.5,
-            vjust=0.4, , color = 'black') +
-  geom_point(color = 'white') +  
-  # geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
-  #           position=position_dodge(width=0.5),
-  #           vjust=0.4, , color = 'black') +
-  scale_color_manual(values = colours_clades6)+
-  labs(y = "", x = "Prevalence (%)",fill="Clade") +
-  theme_minimal()+
-  theme(legend.position = "none",
-        panel.spacing.x = unit(0.1, "lines"),
-        axis.line.x = element_blank(),
-        axis.line.y = element_blank(),
-        axis.ticks.y=element_blank(),
-        axis.text.y=element_text(face = "bold"),
-        plot.margin = margin(5.5, 5.5, 0, 5.5)) +
-  scale_x_continuous(breaks = seq(0,100, 25), limits = c(-1,105)) +
+  scale_x_continuous(breaks = seq(0,100, 25), limits = c(0,105)) +
   facet_grid(bat_age~bat_species, scales = 'free')
 
 bff_prev_plot <-   ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) +  
   aes(y = fct_rev(type), x = prevalence, fill = type, color = type) +
   #geom_col(alpha = 0.6) +
   # geom_errorbar(aes(xmin = lci, xmax = uci),alpha = 0.3,  position = position_dodge(0.5)) +
-  geom_pointrange(aes(xmin = lci, xmax = uci), alpha = 0.8, fatten = 3, linewidth = 5) + 
+  geom_pointrange(aes(xmin = bayes_low, xmax = bayes_high), alpha = 0.8, fatten = 3, linewidth = 5) + 
   geom_vline(xintercept=0)+
   geom_segment(aes(y=0.41,yend=0.41, x=0, xend=20), color = 'black') +
-  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = uci + 1), size = 3.5,
+  geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = bayes_high + 1), size = 3.5,
             vjust=0.4, , color = 'black') +
   geom_point(color = 'white') +  
   # geom_text(aes(label= paste(sprintf("%.1f", round(prevalence, 1)), '%', sep = ''), x = -1.2), size = 3.5,
@@ -240,7 +214,7 @@ bff_prev_plot <-   ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) 
   #           vjust=0.4, , color = 'black') +
   scale_color_manual(values = colours_clades6)+
   labs(y = "", x = "Prevalence (%)",fill="Clade") +
-  theme_minimal() +
+  theme_cowplot()+ #theme_minimal() +
   theme(legend.position = "none",
         panel.spacing.x = unit(0.1, "lines"),
         axis.line.x = element_blank(),
@@ -248,7 +222,7 @@ bff_prev_plot <-   ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) 
         axis.ticks.y=element_blank(),
         axis.text.y=element_text(face = "bold"),
         plot.margin = margin(5.5, 5.5, 0, 5.5)) +
-  scale_x_continuous(breaks = seq(0,25, 5), limits = c(-.1,20)) +
+  scale_x_continuous(breaks = seq(0,25, 5), limits = c(0,20)) +
   facet_grid(bat_age~bat_species, scales = 'free')
 
 
@@ -256,14 +230,17 @@ bff_prev_plot <-   ggplot(df_plot1 %>% filter(bat_species=='Black Flying Fox')) 
 ### Figures 4 C-D BFF and GHFF fitted curves  ####
 ### ### ### ### ### ###
 load('data/model_output/logistic_curve_out.RData') #loads out_fitted_curves
-bats <- read_csv('data/individual_variant_covariates.csv')
+bats <- read_csv('data/individual_variant_covariates.csv') %>% 
+  group_by(accession_update) %>% 
+  mutate(date_end = max(sampling_date)) %>% 
+  ungroup()
 
-# GROUP BY FIRST DATE OF EACH SAMPLING SESSION
+# GROUP BY LAST DATE OF EACH SAMPLING SESSION
 bat_prop  <- bats %>% filter(bat_age %in% c('adult','juve','sub_adult') ) %>%
-  group_by(type, bat_age, bat_species, sampling_date) %>%
+  group_by(type, bat_age, bat_species, date_end) %>%
   summarize(n = n(), n_pos = sum(variant_positive), mean_pos = mean(variant_positive),
             .groups = 'drop') %>% 
-  rename(date = sampling_date)
+  rename(date = date_end)
 
 bff_curves <- out_fitted_curves %>%
   filter(species == 'bff', 
@@ -274,12 +251,12 @@ bff_curves <- out_fitted_curves %>%
                                         type %in% c('beta_2d_ii', 'beta_2d_iv','beta_2d_v', 'beta_2d_vi')) %>% mutate(age = bat_age), alpha = .25) +
   geom_ribbon(alpha = .4,linewidth=0) +
   geom_line(lty = 1,linewidth = 1.2) +
-  facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))~type) +
+  facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Sub-adult','Adult'))~type) +
   scale_fill_manual(values = colours_clades4)+
   scale_colour_manual(values = colours_clades4)+
   scale_size_continuous(range = c(1/3,25/3), breaks = seq(0, 25, by = 5),'# samples')+
   scale_x_date(breaks = seq(as.Date("2018-03-01"), as.Date("2020-03-01"), by = "12 months"), date_labels = "%b\n%Y",limits = c(as.Date("2017-07-01"), as.Date("2021-02-01"))) +
-  theme_minimal() +
+  theme_cowplot() + # theme_minimal() +
   xlab('') + ylab('Prevalence') +
   labs(subtitle = "Black flying foxes\n")+
   theme(plot.subtitle = element_text(hjust = 0.5))+
@@ -295,12 +272,12 @@ ghff_curves <- out_fitted_curves %>%
                                         type %in% c('beta_2d_iii')) %>% mutate(age = bat_age), alpha = .25) +
   geom_ribbon(alpha = .4,linewidth=0) +
   geom_line(lty = 1,linewidth = 1.2) +
-  facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))~type) +
+  facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Sub-adult','Adult'))~type) +
   scale_fill_manual(values = colours_clades4)+
   scale_colour_manual(values = colours_clades4)+
   scale_size_continuous(range = c(1/5,25/5), breaks = seq(0, 25, by = 5),'# samples')+
   scale_x_date(breaks = seq(as.Date("2018-07-01"), as.Date("2020-07-01"), by = "12 months"), date_labels = "%b\n%Y",limits = c(as.Date("2017-11-01"), as.Date("2019-06-01"))) +
-  theme_minimal() +
+  theme_cowplot() + # theme_minimal() +
   theme(plot.subtitle = element_text(hjust = 0.5))+
   xlab('') + ylab('') +
   labs(subtitle = "Grey-headed\nflying foxes")+
@@ -315,7 +292,7 @@ png("figures/Figure4_A-D_final.png", width = 12, height = 11.5, units = 'in', re
 a_b <- plot_grid(bff_prev_plot,ghff_prev_plot, ncol=2, rel_widths = c(0.95,1), labels = c("A","B"))
 # Create a blank spacer plot
 spacer_plot <- ggplot() + theme_void() + theme(plot.margin = margin(0, 0, 2, 0))  # Adjust bottom margin 
-c_d <- plot_grid(bff_curves +theme(legend.position = "none"),ghff_curves+theme(legend.position = "none"),get_legend(bff_curves), ncol=3, rel_widths = c(16,3.2,2),labels = c("C","D",""))
+c_d <- plot_grid(bff_curves +theme(legend.position = "none"),ghff_curves+theme(legend.position = "none"),get_legend(bff_curves), ncol=3, rel_widths = c(16,3.5,2),labels = c("C","D",""))
 plot_grid(a_b,spacer_plot, c_d,nrow = 3, rel_heights = c(4.5,0.4,6))
 dev.off()
 
@@ -323,51 +300,7 @@ dev.off()
 ### Figure 5 
 ### ### ### ### ### ###
 
-# load('data/model_output/logistic_curve_out_contrasts.RData') 
-# out_beta <-   out_beta %>%
-#   bind_cols(tibble(clade_spec= rep(c('beta 2d.ii', 'beta 2d.iv', 'beta 2d.v'), each = 12000))) %>%
-#   mutate(vals2 = case_when(
-#     type == 'beta1 - beta2' ~ -1 * vals,
-#     type == 'beta1 - beta3' ~ -1 * vals,
-#     type == 'beta2 - beta3' ~ vals
-#   )) %>%
-#   mutate(contrast = case_when(
-#     type == 'beta1 - beta2' ~ 'Juvenile - Adult',
-#     type == 'beta1 - beta3' ~ 'Sub-adult - Adult',
-#     type == 'beta2 - beta3' ~ 'Juvenile - Sub-adult',
-#   ))
-# 
-# probs <- out_beta %>% group_by(clade_spec, type) %>%
-#   summarize(prob = mean(vals2 > 0), .groups = 'drop' ) %>%
-#   mutate(contrast = case_when(
-#     type == 'beta1 - beta2' ~ 'Juvenile - Adult',
-#     type == 'beta1 - beta3' ~ 'Sub-adult - Adult',
-#     type == 'beta2 - beta3' ~ 'Juvenile - Sub-adult',
-#   ) )
-# 
-# png("figures/Figure5.png", width = 8, height = 6, units = 'in', res = 1200)
-# out_beta %>% ggplot(aes( x= vals2)) +
-#   geom_histogram(aes(y = after_stat(density)), binwidth = 0.1) +
-#   geom_vline(xintercept = 0, color = red_viridis) +
-#   #  geom_text(aes(label = paste('Prob = ',round(prob,3), sep = ''), y = 2, x = -.75), data = probs,size = 3) +
-#   geom_text(aes(label = round(1 - prob,3), y = 2, x = -.85), data = probs,size = 3) +
-#   geom_text(aes(label = round(prob,3), y = 2, x = .85), data = probs,size = 3) +
-#   facet_grid(contrast~ ~fct_relevel(clade_spec,'beta 2d.ii', 'beta 2d.iv', 'beta 2d.v'), scales = "free_y") + 
-#   theme_bw() +
-#   geom_segment(aes(x=-.1, y=2, xend=-.3, yend=2), arrow = arrow(length=unit(0.15, 'cm'))) +
-#   geom_segment(aes(x=.1, y=2, xend=.3, yend=2), arrow = arrow(length=unit(0.15, 'cm'))) +
-#   # geom_segment(aes(x=-.5, y=1.75, xend=-1.25, yend=1.75), arrow = arrow(length=unit(0.2, 'cm'))) +
-#   # geom_segment(aes(x=.5, y=1.75, xend=1.25, yend=1.75), arrow = arrow(length=unit(0.2, 'cm'))) +
-#   # # ggtitle('Contrast of Coefficients from Dynamic Binary Regression from BFF') +
-#   # labs(caption = 'Prob corresponds to the probability that the first class is larger.') +
-#   # theme_minimal()+
-#   theme_cowplot()+
-#   xlab('')+
-#   ylab('Density')
-#  dev.off()
-
 load('data/model_output/logistic_curve_out.RData') 
-out_beta_github <-
 
 out_beta <- out_beta |> 
   filter(species == 'bff') |> 
@@ -413,20 +346,26 @@ out_beta %>% ggplot(aes( x= vals2)) +
 dev.off()
 
 ### ### ### ### ### ###
-### Supp Figure 8 
+### Supp Figure 10 
 ### ### ### ### ### ###
 
 out_fitted_curves <- read_csv('data/model_output/cluster_curves.csv')
 
 bats <- read_csv('data/combined_out_variant.csv') %>%
-  mutate(variant_positive = ifelse(variant_positive=="FALSE", 0, 1))
+  mutate(variant_positive = ifelse(variant_positive=="FALSE", 0, 1)) %>% 
+  # group multi-day capture sessions into a single date for prevalence estimates
+  mutate(year_month = if_else(session_type == "C", format(date_end, "%Y-%m"),NA_character_)) %>%
+  group_by(site, type, year_month, session_type) %>%
+  mutate(session_date_end = if_else(session_type == "C",
+                                      max(date_end),
+                                      date_end))
 
 bat_prop  <- bats %>% 
-  group_by(type, site, date_end,session_type) %>%
+  group_by(type, site, session_date_end, session_type) %>%
   mutate(session_type = factor(session_type, levels = c("C", "R"), labels = c("Ind", "UR"))) %>% 
   summarize(n = n(), n_pos = sum(variant_positive), mean_pos = mean(variant_positive),
             .groups = 'drop') %>% 
-  rename(date=date_end,
+  rename(date=session_date_end,
          cluster=type)  
 
 alpha_reproSI = c(0.01, 0.05, 0.10, 0.15) # lighter shading to allow for points
@@ -476,17 +415,20 @@ out_fitted_curves %>%
 dev.off()
 
 ### ### ### ### ### ###
-### Supp Figure 9 
+### Supp Figure 11 
 ### ### ### ### ### ###
 load('data/model_output/logistic_curve_out.RData') 
-bats <- read_csv('data/individual_variant_covariates.csv')
+bats <- read_csv('data/individual_variant_covariates.csv') %>% 
+  # group multi-day capture sessions into a single date for prevalence estimates
+  group_by(accession_update) %>%
+  mutate(session_date_end = max(sampling_date))
 
 # GROUP BY FIRST DATE OF EACH SAMPLING SESSION
 bat_prop  <- bats %>% filter(bat_age %in% c('adult','juve','sub_adult') ) %>% 
-  group_by(type, bat_age, bat_species, sampling_date) %>%
+  group_by(type, bat_age, bat_species, session_date_end) %>%
   summarize(n = n(), n_pos = sum(variant_positive), mean_pos = mean(variant_positive),
             .groups = 'drop') %>% 
-  rename(date = sampling_date)
+  rename(date = session_date_end)
 
 png("figures/SIFigure9.png", width = 16, height = 7, units = 'in', res = 300)
 
@@ -522,7 +464,7 @@ bff_curves <- out_fitted_curves %>%
   geom_jitter(inherit.aes = F, aes(x = date, y = mean_pos, size = n, colour = type),shape = 1, width = 4,height = 0,
               data = bat_prop %>% filter(bat_species == 'bff',
                                          type %in% c('beta_2d_ii', 'beta_2d_iv','beta_2d_v', 'beta_2d_vi')) %>% mutate(age = bat_age)) + 
-  facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Subadult','Adult'))~type) +
+  facet_grid(factor(age, levels = c('juve','sub_adult','adult'), labels=c('Juvenile','Sub-adult','Adult'))~type) +
   scale_fill_manual(values = colours_clades6[c(2,4,5,6)])+
   scale_colour_manual(values = colours_clades6[c(2,4,5,6)])+
   scale_size_continuous(range = c(1/3,25/3), breaks = seq(0, 25, by = 5),'# samples')+
