@@ -1,11 +1,9 @@
-### Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and sub-adult bats.
+## Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and sub-adult bats.
+
+### General Information
 
 This repo contains instructions and source code for reproducing the statistical analyses in the manuscript.
 Pteropus spp is associated with co-infections in juvenile and subadult bats"
-
-GENERAL INFORMATION
-
-Title of Dataset: Data from: Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and subadult bats
 
 Author/Principal Investigator Information
 Name: Plowright, Raina K.
@@ -30,7 +28,7 @@ DARPA PREEMPT program Cooperative Agreement # D18AC00031. The content of the inf
 necessarily reflect the position or the policy of the U.S. government, and no official endorsement should be inferred.
 AJP was supported by an ARC DECRA fellowship (DE190100710) and a University of Sydney Horizons Fellowship.
 
-SHARING/ACCESS INFORMATION
+### Sharing / Access Information
 
 Licenses/restrictions placed on the data: 
 This dataset is shared under a Creative Commons 1.0 Universal Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/). The material can be copied, modified and used without permission, but attribution to the original authors is always appreciated. 
