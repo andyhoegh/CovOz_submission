@@ -1,7 +1,42 @@
 ### Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and sub-adult bats.
 
 This repo contains instructions and source code for reproducing the statistical analyses in the manuscript.
+Pteropus spp is associated with co-infections in juvenile and subadult bats"
 
+GENERAL INFORMATION
+
+Title of Dataset: Data from: Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and subadult bats
+
+Author/Principal Investigator Information
+Name: Plowright, Raina K.
+ORCID: https://orcid.org/0000-0002-3338-6590
+Institution: Cornell University
+Email: rkp57@cornell.edu
+
+Author/Corresponding Authors
+Name: Peel, Alison J.
+ORCID: https://orcid.org/0000-0003-3538-3550
+Institution: University of Sydney
+Email: alison.peel@sydney.edu.au
+
+Name: Hoegh, Andrew
+ORCID: https://orcid.org/0000-0003-1176-4965
+Institution: Montana State University
+Email: andrew.hoegh@montana.edu
+
+Information about funding sources that supported the collection of the data: 
+The project was supported by the National Science Foundation (DEB1716698, EF2133763, EF-2231624), and the
+DARPA PREEMPT program Cooperative Agreement # D18AC00031. The content of the information does not
+necessarily reflect the position or the policy of the U.S. government, and no official endorsement should be inferred.
+AJP was supported by an ARC DECRA fellowship (DE190100710) and a University of Sydney Horizons Fellowship.
+
+SHARING/ACCESS INFORMATION
+
+Licenses/restrictions placed on the data: 
+This dataset is shared under a Creative Commons 1.0 Universal Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/). The material can be copied, modified and used without permission, but attribution to the original authors is always appreciated. 
+
+Recommended citation for this dataset: 
+Alison J. Peel, Manuel Ruiz-Aravena, Karan Kim, Braden Scherting, Caylee A. Falvo, Daniel E. Crowley, Vincent J. Munster, Edward J. Annand, Karren Plain, Devin N. Jones, Tamika J. Lunn, Adrienne S. Dale, Andrew Hoegh, John-Sebastian Eden, Raina K. Plowright. (2024) Data from: Synchronized seasonal excretion of multiple coronaviruses in Australian Pteropus spp is associated with co-infections in juvenile and subadult bats. [dataset] Cornell University Library eCommons Repository. https://doi.org/10.7298/w7sw-6161
 
 ### Repo Contents
 
